@@ -28,6 +28,7 @@ namespace Zepheus.World
                 Log.IsDebug = Settings.Instance.Debug;
                 Zones = new ConcurrentDictionary<byte, ZoneConnection>();
                 Console.Title = "Zepheus.World[" + Settings.Instance.ID + "]";
+                Log.WriteLine(LogLevel.Info, "Ready...");
 
                 while (true)
                 {
@@ -82,10 +83,10 @@ namespace Zepheus.World
 
         public static bool Load()
         {
-            if (!Settings.Load("World.xml"))
+            if (!Settings.Load("World.json"))
             {
                 CreateDefaultSettings();
-                Settings.Instance.Save("World.xml");
+                Settings.Instance.Save("World.json");
             }
 
             Log.SetLogToFile(string.Format(@"Logs\World\{0}.log", DateTime.Now.ToString("d_M_yyyy HH_mm_ss")));
@@ -143,7 +144,7 @@ namespace Zepheus.World
             Settings.Instance.Entity = new EntitySetting()
             {
                 DataCatalog = "Zepheus_World",
-                DataSource = @"CSHARP-PC\SQLEXPRESS",
+                DataSource = @"SQLSERVER\FIESTA",
                 Metadata = @"res://*/World.csdl|res://*/World.ssdl|res://*/World.msl",
             };
         }

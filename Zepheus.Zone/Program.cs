@@ -31,6 +31,7 @@ namespace Zepheus.Zone
             {
                 // Start Worker thread.
                 Worker.Load();
+                Log.WriteLine(LogLevel.Info, "Ready...");
 
                 while (true)
                 {
@@ -65,10 +66,10 @@ namespace Zepheus.Zone
 
         private static bool Load()
         {
-            if (!Settings.Load("Zone.xml"))
+            if (!Settings.Load("Zone.json"))
             {
                 CreateDefaultSettings();
-                Settings.Instance.Save("Zone.xml");
+                Settings.Instance.Save("Zone.json");
             }
             Log.SetLogToFile(string.Format(@"Logs\Zone\{0}.log", DateTime.Now.ToString("yyyy-MM-dd HHmmss")));
             Randomizer = new Random();

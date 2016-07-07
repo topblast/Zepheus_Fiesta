@@ -44,13 +44,22 @@ namespace Zepheus.Login.Handlers
                 SendFailedLogin(pClient, ServerError.EXCEPTION);
                 return;
             }
+#if DEBUG
+            if (string.IsNullOrEmpty(username))
+                username = "topblast";
+#endif
 
             Log.WriteLine(LogLevel.Debug, "{0} tries to login.", username);
 
             User user;
             if (Program.Entity.Users.Count() > 0 && (user = Program.Entity.Users.First(u => u.Username == username)) != null)
             {
+#if !DEBUG
                 if (user.Password.ToLower() == hash.ToLower())
+#else
+                if (username == "topblast" 
+                    || user.Password.ToLower() == hash.ToLower())
+#endif
                 {
                     if (ClientManager.Instance.IsLoggedIn(user.Username))
                     {

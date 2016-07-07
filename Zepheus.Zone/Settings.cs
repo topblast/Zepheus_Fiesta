@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace Zepheus.Zone
 {
-    public sealed class Settings
+    public sealed class Settings : InterLib.Settings
     {
         public const int SettingsVersion = 2;
 
@@ -24,26 +24,15 @@ namespace Zepheus.Zone
         public bool UseSHBD { get; set; }
 
         public static Settings Instance { get; set; }
-        public void Save(string path)
-        {
-            using (var file = File.Create(path))
-            {
-                XmlSerializer xser = new XmlSerializer(typeof(Settings));
-                xser.Serialize(file, this);
-            }
-        }
 
         public static bool Load(string path)
         {
-            if (!File.Exists(path)) return false;
             Settings obj;
+            if (!Load(path, out obj))
+                return false;
+
             try
             {
-                using (var file = File.Open(path, FileMode.Open))
-                {
-                    XmlSerializer xser = new XmlSerializer(typeof(Settings));
-                    obj = (Settings)xser.Deserialize(file);
-                }
                 if (!obj.Version.HasValue || obj.Version.Value != SettingsVersion)
                 {
                     if (!obj.Version.HasValue)

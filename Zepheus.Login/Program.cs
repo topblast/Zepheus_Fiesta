@@ -2,6 +2,9 @@
 using System.Linq;
 using Zepheus.Database;
 using Zepheus.Util;
+#if DEBUG
+using System.IO;
+#endif
 
 namespace Zepheus.Login
 {
@@ -14,12 +17,14 @@ namespace Zepheus.Login
         {
             //if debug we always start with default settings :)
 #if DEBUG
-            //File.Delete("Login.xml");
+            if (File.Exists("Login.xml"))
+                File.Delete("Login.xml");
 #endif
             Console.Title = "Zepheus.Login";
             if (Load())
             {
                 Log.IsDebug = Settings.Instance.Debug;
+                Log.WriteLine(LogLevel.Info, "Ready...");
                 while (true)
                     Console.ReadLine();
             }
@@ -32,10 +37,10 @@ namespace Zepheus.Login
 
         public static bool Load()
         {
-            if (!Settings.Load("Login.xml"))
+            if (!Settings.Load("Login.json"))
             {
                 CreateDefaultSettings();
-                Settings.Instance.Save("Login.xml");
+                Settings.Instance.Save("Login.json");
             }
 
             Log.SetLogToFile(string.Format(@"Logs\Login\{0}.log", DateTime.Now.ToString("d_M_yyyy HH_mm_ss")));
@@ -63,7 +68,7 @@ namespace Zepheus.Login
             Settings.Instance.Entity = new EntitySetting()
             {
                 DataCatalog = "Zepheus_Account",
-                DataSource = @"CSHARP-PC\SQLEXPRESS",
+                DataSource = @"SQLSERVER\FIESTA",
                 Metadata = @"res://*/Account.csdl|res://*/Account.ssdl|res://*/Account.msl",
             };
         }

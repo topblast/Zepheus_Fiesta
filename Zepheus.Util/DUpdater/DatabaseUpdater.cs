@@ -53,37 +53,48 @@ namespace Zepheus.Util.DUpdater
                 if (Directory.Exists("SQL"))
                 {
                     string type = _type == DatabaseTypes.Login ? "login" : "world";
+                    SortedDictionary<int, string> patchOrder = new SortedDictionary<int, string>();
                     foreach (string filename in Directory.GetFiles("SQL", type + "_*.sql"))
                     {
+                        string[] pieces = filename.Split('_'); // login_XX_dat-a-lawl.sql
+                        int p = 0;
+                        if (!int.TryParse(pieces[1], out p))
+                        {
+                            Log.WriteLine(LogLevel.Warn, "Invalid patch version {0} for file '{1} ...Skipping...", pieces[1], filename);
+                            continue;
+                        }
+
+                        if (p <= version)
+                            continue; // Already ran this one!
+                        
+                        Log.WriteLine(LogLevel.Info, "{0} patch found, Version {1} - {2}.", pieces[0], pieces[1], pieces[2]);
+                        patchOrder.Add(p, filename);
+                    }
+                    foreach(var pair in patchOrder)
+                    {
+                        if (pair.Key < patch)
+                        {
+                            Log.WriteLine(LogLevel.Warn, "Patch ID out of order O.o. Using last patch ID instead: {0}", patch);
+                        }
+                        else
+                        {
+                            patch = pair.Key;
+                        }
+                        string FileName = pair.Value;
+                        string message = FileName.Split('_')[2].Replace(".sql", "");
                         try
                         {
-                            string[] pieces = filename.Split('_'); // login_XX_dat-a-lawl.sql
-                            int p = int.Parse(pieces[1]);
-
-                            if (p <= version) continue; // Already ran this one!
-
-                            if (p < patch)
-                            {
-                                Log.WriteLine(LogLevel.Warn, "Patch ID out of order O.o. Using last patch ID instead: {0}", patch);
-                            }
-                            else
-                            {
-                                patch = p;
-                            }
-                            string message = pieces[2].Replace(".sql", "");
-
                             Log.WriteLine(LogLevel.Info, "Trying to update {0} database with patch {1}. Message:", type, patch);
                             Log.WriteLine(LogLevel.Info, message);
-                            RunFile(filename, connection);
+                            RunFile(FileName, connection);
                         }
                         catch (Exception ex)
                         {
-                            Log.WriteLine(LogLevel.Exception, "Could not parse file {0}: {1}", filename, ex.ToString());
+                            Log.WriteLine(LogLevel.Exception, "Could not parse file {0}: {1}", FileName, ex.ToString());
                             Console.ReadLine();
                             Environment.Exit(400);
                         }
                     }
-
                     if (version < patch)
                     {
                         Log.WriteLine(LogLevel.Info, "Database updated!");
